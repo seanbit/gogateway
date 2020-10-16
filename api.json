@@ -1,0 +1,62 @@
+[
+  {
+    "path": "api/v1",
+    "middelWares": [""],
+    "services": [
+      {
+        "path": "/auth",
+        "middelWares": [""],
+        "services": [
+          {
+            "path": "/genToken",
+            "middelWares": [""],
+            "services": [],
+            "do": {
+              "httpMethod": "post",
+              "rpcServer": "",
+              "rpcService": "",
+              "rpcMethod": "",
+              "rpcRequest": "",
+              "rpcResponse": ""
+            }
+          },
+          {
+            "path": "/accessToken",
+            "middelWares": [""],
+            "services": [],
+            "do": {
+              "httpMethod": "post",
+              "rpcServer": "",
+              "rpcService": "",
+              "rpcMethod": "",
+              "rpcRequest": "",
+              "rpcResponse": ""
+            }
+          }
+        ],
+        "do": {}
+      },
+      {
+        "path": "/admin",
+        "middelWares": [""],
+        "services": [
+          {
+            "path": "/login",
+            "middelWares": [""],
+            "services": [],
+            "do": {
+              "httpMethod": "post",
+              "rpcServer": "",
+              "rpcService": "",
+              "rpcMethod": "",
+              "rpcRequest": "",
+              "rpcResponse": ""
+            }
+          }
+        ],
+        "do": {}
+      }
+    ],
+    "do": {}
+  }
+]
