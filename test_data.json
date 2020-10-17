@@ -1,0 +1,45 @@
+[
+  {
+    "_data_type_name_": "User",
+    "_dt_field_type_": {
+      "UserId":"int",
+      "UserName":"string",
+      "Email":"string"
+    },
+    "_dt_field_tag_": {
+      "UserId":"json:\"user_id\" validate:\"required,min=1\"",
+      "UserName":"json:\"user_name\" validate:\"required,eorp\"",
+      "Email":"json:\"email\" validate:\"required,email\""
+    }
+  },
+  {
+    "_data_type_name_":"GoodsPayInfoParameter",
+    "_dt_field_type_": {
+      "GoodsId":"int",
+      "GoodsName":"string",
+      "GoodsAmount":"int",
+      "Remark":"string"
+    },
+    "_dt_field_tag_": {
+      "GoodsId":"json:\"goods_id\" validate:\"required,min=1\"",
+      "GoodsName":"json:\"goods_name\" validate:\"required,gte=1\"",
+      "GoodsAmount":"json:\"goods_amount\" validate:\"required,min=1\"",
+      "Remark":"json:\"remark\" validate:\"gte=0\""
+    }
+  },
+  {
+    "_data_type_name_":"GoodsPayParameter",
+    "_dt_field_type_":{
+      "UserInfo":"{User}",
+      "Goods":"[GoodsPayInfoParameter]",
+      "GoodsIds":"[int]"
+    },
+    "_dt_field_tag_":{
+      "UserInfo":"json:\"user_info\" validate:\"required\"",
+      "Goods":"json:\"goods\" validate:\"required,gte=1,dive,required\"",
+      "GoodsIds":"json:\"goods_ids\" validate:\"required,gte=1,dive,min=1\""
+    }
+  }
+]
+
+

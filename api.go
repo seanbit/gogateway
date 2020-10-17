@@ -6,8 +6,6 @@ import (
 	"io/ioutil"
 )
 
-var __APIServices []APIService
-
 type HTTPMethod string
 const (
 	HTTPMethodPOST 		= "post"
@@ -32,6 +30,8 @@ type APIDo struct {
 	RpcResponse 	string     		`json:"rpcResponse" validate:"required,gte=1"`
 }
 
+var __APIServices []APIService
+
 func LoadApis(path string) []APIService {
 	bts, err := ioutil.ReadFile(path)
 	if err != nil {
@@ -47,5 +47,3 @@ func LoadApis(path string) []APIService {
 	__APIServices = apiservices
 	return apiservices
 }
-
-

@@ -4,11 +4,11 @@
     "middelWares": [""],
     "services": [
       {
-        "path": "/auth",
+        "path": "/order",
         "middelWares": [""],
         "services": [
           {
-            "path": "/genToken",
+            "path": "/pay",
             "middelWares": [""],
             "services": [],
             "do": {
