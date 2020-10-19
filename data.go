@@ -9,7 +9,7 @@ import (
 	"unicode"
 )
 
-var __DataTypes = make(map[string]reflect.Type)
+var _data_types_ = make(map[string]reflect.Type)
 
 const (
 	type_bool 		= "bool"
@@ -37,9 +37,10 @@ type dtInfo struct {
 var (
 	ftRegexp  = regexp.MustCompile(`^\{([\s\S]+)}$`)
 	ftsRegexp = regexp.MustCompile(`^\[([\s\S]+)]$`)
+	dtsRegexp = regexp.MustCompile(`^\[]([\s\S]+)`)
 )
 
-func LoadDatas(path string) map[string]reflect.Type {
+func DataDefines(path string) map[string]reflect.Type {
 	bts, err := ioutil.ReadFile(path)
 	if err != nil {
 		log.Panic(err)
@@ -49,22 +50,34 @@ func LoadDatas(path string) map[string]reflect.Type {
 		log.Panic(err)
 	}
 	for _, dtinfo := range datatypes {
-		dataType := parseDataType(dtinfo)
-		__DataTypes[dtinfo.Name] = dataType
+		dataType := parseStructDataType(dtinfo)
+		_data_types_[dtinfo.Name] = dataType
 	}
-	return __DataTypes
+	return _data_types_
 }
 
 func NewData(dtname string) interface{} {
-	if dt, ok := __DataTypes[dtname]; ok {
-		so := reflect.New(dt)
-		return so.Interface()
+	if dt, ok := parseBaseType(dtname); ok {
+		return reflect.New(dt).Interface()
+	}
+	if params := dtsRegexp.FindStringSubmatch(dtname); len(params) == 2 && params[0] == dtname { // slice shoud handle
+		typeName := params[1]
+		if dt, ok := parseBaseType(typeName); ok {
+			return reflect.MakeSlice(dt, 0, 0).Interface()
+		} else if dt, ok := _data_types_[typeName]; ok {
+			return reflect.MakeSlice(dt, 0, 0).Interface()
+		} else {
+			return nil
+		}
+	}
+	if dt, ok := _data_types_[dtname]; ok {
+		return reflect.New(dt).Interface()
 	} else {
 		return nil
 	}
 }
 
-func parseDataType(info dtInfo) reflect.Type {
+func parseStructDataType(info dtInfo) reflect.Type {
 	if err := validate.ValidateParameter(info); err != nil {
 		log.Fatalf("datainfo parse faiiled on {%s}, valid err: %s", info.Name, err.Error())
 	}
@@ -75,7 +88,7 @@ func parseDataType(info dtInfo) reflect.Type {
 			fieldType = ft
 		} else if params := ftRegexp.FindStringSubmatch(typeInfo); len(params) == 2 && params[0] == typeInfo {
 			typeName := params[1]
-			if dt, ok := __DataTypes[typeName]; ok {
+			if dt, ok := _data_types_[typeName]; ok {
 				fieldType = dt
 			} else {
 				log.Fatalf("data parse type err: could not found typename {%s} before this data {%s}", typeName, info.Name)
@@ -84,7 +97,7 @@ func parseDataType(info dtInfo) reflect.Type {
 			typeName := params[1]
 			if dt, ok := parseBaseType(typeName); ok {
 				fieldType = reflect.SliceOf(dt)
-			} else if dt, ok := __DataTypes[typeName]; ok {
+			} else if dt, ok := _data_types_[typeName]; ok {
 				fieldType = reflect.SliceOf(dt)
 			} else {
 				log.Fatalf("data parse type err: could not found typename [%s] before this data {%s}", typeName, info.Name)

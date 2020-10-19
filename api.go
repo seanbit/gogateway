@@ -22,28 +22,31 @@ type APIService struct {
 }
 
 type APIDo struct {
-	HttpMethod  	HTTPMethod 		`json:"httpMethod" validate:"required,oneof=post get put delete"`
-	RpcServer   	string 	   		`json:"rpcServer" validate:"required,gte=1"`
-	RpcService  	string 	   		`json:"rpcService" validate:"required,gte=1"`
-	RpcMethod   	string     		`json:"rpcMethod" validate:"required,gte=1"`
-	RpcRequest  	string     		`json:"rpcRequest" validate:"required,gte=1"`
-	RpcResponse 	string     		`json:"rpcResponse" validate:"required,gte=1"`
+	HttpMethod   HTTPMethod `json:"httpMethod" validate:"required,oneof=post get put delete"`
+	RpcServer    string     `json:"rpcServer" validate:"required,gte=1"`
+	RpcService   string     `json:"rpcService" validate:"required,gte=1"`
+	RpcMethod    string     `json:"rpcMethod" validate:"required,gte=1"`
+	RpcParameter string     `json:"rpcParameter" validate:"required,gte=1"`
+	RpcResponse  string     `json:"rpcResponse" validate:"required,gte=1"`
 }
 
-var __APIServices []APIService
+var _api_services_ []APIService
 
-func LoadApis(path string) []APIService {
+func ApiDefines(path string) []APIService {
 	bts, err := ioutil.ReadFile(path)
 	if err != nil {
 		log.Panic(err)
 	}
-	var apiservices = make([]APIService, 1)
-	if err := json.Unmarshal(bts, &apiservices); err != nil {
+	type ApiServices struct {
+		apiservices *[]APIService	`validate:"required,gte=0,dive,required"`
+	}
+	var apiservices = &ApiServices{apiservices: new([]APIService)}
+	if err := json.Unmarshal(bts, apiservices.apiservices); err != nil {
 		log.Panic(err)
 	}
 	if err := validate.ValidateParameter(apiservices); err != nil {
 		log.Panic(err)
 	}
-	__APIServices = apiservices
-	return apiservices
+	_api_services_ = *apiservices.apiservices
+	return _api_services_
 }

@@ -24,7 +24,7 @@ func TestGateway(t *testing.T) {
 	// concurrent
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	// gateway
-	Serve(ServerName, rpcConfig, httpConfig, nil, "./data.json", "./api.json")
+	Serve(ServerName, rpcConfig, httpConfig, nil, "./test_data.json", "./test_api.json")
 }
 
 func TestPost(t *testing.T) {
@@ -32,8 +32,7 @@ func TestPost(t *testing.T) {
 }
 
 func TestServerBindParameter(t *testing.T) {
-
-	LoadDatas("./test_data.json")
+	DataDefines("./test_data.json")
 	var services = []serving.Registry{serving.Registry{Name: "testproduct-gateway", Rcvr: new(service), Metadata: ""}}
 	serving.Serve(rpcConfig, nil, services, true)
 	ginserver.Serve(httpConfig, log, func(engine *gin.Engine) {
@@ -103,25 +102,7 @@ func TestPostToPay(t *testing.T)  {
 	}
 }
 
-var rpcConfig = serving.RpcConfig{
-	RunMode:              foundation.RUN_MODE_DEBUG,
-	RpcPort:              9001,
-	RpcPerSecondConnIdle: 500,
-	ReadTimeout:          30 * time.Second,
-	WriteTimeout:         30 * time.Second,
-	TokenAuth:            false,
-	Token:                nil,
-	TlsAuth:              false,
-	Tls:                  nil,
-	WhitelistAuth:        false,
-	Whitelist:            nil,
-	Registry:             &serving.EtcdRegistry{
-		EtcdRpcUserName: "root",
-		EtcdRpcPassword: "etcd.user.root.pwd",
-		EtcdRpcBasePath: "seanbit/serving/rpc/credence",
-		EtcdEndPoints:   []string{"127.0.0.1:2379"},
-	},
-}
+
 
 var httpConfig = ginserver.HttpConfig{
 	RunMode:          foundation.RUN_MODE_DEBUG,

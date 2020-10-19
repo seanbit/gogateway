@@ -2,6 +2,7 @@ package gateway
 
 import (
 	"fmt"
+	"reflect"
 	"testing"
 )
 
@@ -25,7 +26,7 @@ type GoodsPayParameter struct {
 }
 
 func TestDataNew(t *testing.T) {
-	LoadDatas("./test_data.json")
+	DataDefines("./test_data.json")
 	parameter := NewData("GoodsPayParameter")
 	fmt.Printf("%+v\n", parameter)
 }
@@ -40,5 +41,38 @@ func TestParse(t *testing.T) {
 	params = ftsRegexp.FindStringSubmatch(someDts)
 	for idx, p := range params {
 		fmt.Printf("%d---%s\n", idx, p)
+	}
+}
+
+func TestNewDataParse(t *testing.T) {
+	var dtname = "string"
+	if ft, ok := parseBaseType(dtname); ok {
+		var val = reflect.New(ft)
+		fmt.Printf("%+v", val)
+		//return reflect.Zero(ft)
+	} else if params := ftRegexp.FindStringSubmatch(dtname); len(params) == 2 && params[0] == dtname {
+		typeName := params[1]
+		if dt, ok := _data_types_[typeName]; ok {
+			ft = dt
+			var val = reflect.New(ft)
+			fmt.Printf("%+v", val)
+		} else {
+			log.Fatalf("data parse type err: could not found typename {%s} before this data {%s}", typeName, "somedata")
+		}
+	} else if params = ftsRegexp.FindStringSubmatch(dtname); len(params) == 2 && params[0] == dtname { // slice shoud handle
+		typeName := params[1]
+		if dt, ok := parseBaseType(typeName); ok {
+			ft = reflect.SliceOf(dt)
+			var val = reflect.MakeSlice(dt, 0, 0)
+			fmt.Printf("%+v", val)
+		} else if dt, ok := _data_types_[typeName]; ok {
+			ft = reflect.SliceOf(dt)
+			var val = reflect.MakeSlice(dt, 0, 0)
+			fmt.Printf("%+v", val)
+		} else {
+			log.Fatalf("data parse type err: could not found typename [%s] before this data {%s}", typeName, dtname)
+		}
+	} else {
+		log.Fatalf("data parse type err: could not parse type with %s in this data %s", dtname, "somedata")
 	}
 }

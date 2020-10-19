@@ -6,18 +6,38 @@ import (
 	"github.com/seanbit/ginserver"
 	"github.com/seanbit/goserving"
 	"github.com/sirupsen/logrus"
+	"strings"
 )
 
-var log logrus.FieldLogger
-var middlewares = make(map[string]gin.HandlerFunc)
+var (
+	log logrus.FieldLogger
+	middlewares = make(map[string]gin.HandlerFunc)
+	definedHandlers = make(map[string]gin.HandlerFunc)
+)
+
+func MiddleWareSet(mw map[string]gin.HandlerFunc)  {
+	middlewares = mw
+}
+
+func MiddleWareAdd(name string, handler gin.HandlerFunc) {
+	middlewares[name] = handler
+}
+
+func DefinedHandlersSet(ddHandlers map[string]gin.HandlerFunc)  {
+	definedHandlers = ddHandlers
+}
+
+func DefinedHandlerAdd(path string, handler gin.HandlerFunc) {
+	definedHandlers[path] = handler
+}
 
 func Serve(pname string, rpcConfig serving.RpcConfig, httpConfig ginserver.HttpConfig, logger logrus.FieldLogger, dataPath, apiPath string)  {
 	if logger == nil {
 		logger = logrus.New()
 	}
 	log = logger
-	LoadDatas(dataPath)
-	apiServices := LoadApis(apiPath)
+	DataDefines(dataPath)
+	apiServices := ApiDefines(apiPath)
 	var services = []serving.Registry{serving.Registry{Name: pname + "-gateway", Rcvr: new(service), Metadata: ""}}
 	serving.Serve(rpcConfig, nil, services, true)
 	ginserver.Serve(httpConfig, log, func(engine *gin.Engine) {
@@ -52,9 +72,18 @@ func apiRegister(engine *gin.Engine, group *gin.RouterGroup, service APIService)
 		return
 	}
 	// register api
-	var apiHandler = func(c *gin.Context) {
+	var apiHandler gin.HandlerFunc
+	if group != nil {
+		path := group.BasePath() + "/" + service.Path
+		path = strings.ReplaceAll(path, "//", "/")
+		if handler, ok := definedHandlers[path]; ok {
+			apiHandler = handler
+			goto HANDLER_REGISTER
+		}
+	}
+	apiHandler = func(c *gin.Context) {
 		g := ginserver.Gin{Ctx: c}
-		parameter := NewData(service.Do.RpcRequest)
+		parameter := NewData(service.Do.RpcParameter)
 		response := NewData(service.Do.RpcResponse)
 		serving.TraceBind(g.Ctx, g.Trace().TraceId, g.Trace().UserId, g.Trace().UserName, g.Trace().UserRole)
 		err := serving.Call(service.Do.RpcService, service.Do.RpcServer, g.Ctx, service.Do.RpcMethod, parameter, response)
@@ -64,6 +93,7 @@ func apiRegister(engine *gin.Engine, group *gin.RouterGroup, service APIService)
 		}
 		g.ResponseData(response)
 	}
+	HANDLER_REGISTER:
 	handlers = append(handlers, apiHandler)
 	switch service.Do.HttpMethod {
 	case HTTPMethodGET:
@@ -75,14 +105,6 @@ func apiRegister(engine *gin.Engine, group *gin.RouterGroup, service APIService)
 	case HTTPMethodDELETE:
 		group.DELETE(service.Path, handlers...)
 	}
-}
-
-func MiddleWareSet(mw map[string]gin.HandlerFunc)  {
-	middlewares = mw
-}
-
-func MiddleWareAdd(name string, handler gin.HandlerFunc) {
-	middlewares[name] = handler
 }
 
 
