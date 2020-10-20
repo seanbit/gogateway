@@ -15,7 +15,7 @@ func TestServing(t *testing.T) {
 	var services = []serving.Registry{
 		serving.Registry{
 			Name:     "test-order",
-			Rcvr:     orderService{},
+			Rcvr:     OrderService,
 			Metadata: "",
 		},
 	}

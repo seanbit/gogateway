@@ -2,6 +2,7 @@ package gateway
 
 import (
 	"context"
+	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/seanbit/ginserver"
 	"github.com/seanbit/goserving"
@@ -84,7 +85,19 @@ func apiRegister(engine *gin.Engine, group *gin.RouterGroup, service APIService)
 	apiHandler = func(c *gin.Context) {
 		g := ginserver.Gin{Ctx: c}
 		parameter := NewData(service.Do.RpcParameter)
+		if parameter == nil {
+			g.ResponseError(errors.New("api data parameter init nil in path:" + service.Path + " dataType:" + service.Do.RpcParameter))
+			return
+		}
+		if err := g.BindParameter(parameter); err != nil {
+			g.ResponseError(err)
+			return
+		}
 		response := NewData(service.Do.RpcResponse)
+		if response == nil {
+			g.ResponseError(errors.New("api data response init nil in path:" + service.Path + " dataType:" + service.Do.RpcResponse))
+			return
+		}
 		serving.TraceBind(g.Ctx, g.Trace().TraceId, g.Trace().UserId, g.Trace().UserName, g.Trace().UserRole)
 		err := serving.Call(service.Do.RpcService, service.Do.RpcServer, g.Ctx, service.Do.RpcMethod, parameter, response)
 		if err != nil {

@@ -10,6 +10,7 @@ import (
 	"github.com/seanbit/gokit/foundation"
 	"github.com/seanbit/gokit/validate"
 	"github.com/seanbit/goserving"
+	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
 	"runtime"
@@ -21,10 +22,12 @@ const ServerName = "gatewaytest"
 
 func TestGateway(t *testing.T) {
 	rpcConfig.RpcPort = 6185
+	var testgatewaylog = logrus.New()
+	testgatewaylog.ReportCaller = true
 	// concurrent
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	// gateway
-	Serve(ServerName, rpcConfig, httpConfig, nil, "./test_data.json", "./test_api.json")
+	Serve(ServerName, rpcConfig, httpConfig, testgatewaylog, "./test_data.json", "./test_api.json")
 }
 
 func TestPost(t *testing.T) {

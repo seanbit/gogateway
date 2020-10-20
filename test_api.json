@@ -13,11 +13,11 @@
             "services": [],
             "do": {
               "httpMethod": "post",
-              "rpcServer": "",
-              "rpcService": "",
-              "rpcMethod": "",
-              "rpcRequest": "",
-              "rpcResponse": ""
+              "rpcServer": "gatewaytest",
+              "rpcService": "test-order",
+              "rpcMethod": "GoodsPay",
+              "rpcParameter": "GoodsPayParameter",
+              "rpcResponse": "string"
             }
           },
           {
@@ -29,7 +29,7 @@
               "rpcServer": "",
               "rpcService": "",
               "rpcMethod": "",
-              "rpcRequest": "",
+              "rpcParameter": "",
               "rpcResponse": ""
             }
           }
@@ -49,7 +49,7 @@
               "rpcServer": "",
               "rpcService": "",
               "rpcMethod": "",
-              "rpcRequest": "",
+              "rpcParameter": "",
               "rpcResponse": ""
             }
           }
